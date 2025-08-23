@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Environmental Analysis Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+    <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="resize-handle"></div>
+            <div class="sidebar-header">
+                <h1>🌍 Environmental Analysis</h1>
+                <p>Open Source Satellite Analysis Platform</p>
+            </div>
+            
+            <div class="sidebar-content">
+                <!-- Analysis Parameters -->
+                <div class="section">
+                    <h3>⚙ Analysis Parameters</h3>
+                    
+                    <div class="form-group">
+                        <label for="startDate">Start Date:</label>
+                        <input type="date" id="startDate" value="2021-01-01" min="2015-01-01" 
+                            max="" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="endDate">End Date:</label>
+                        <input type="date" id="endDate" value="2023-01-01" min="2015-01-01" 
+                            max="" required>
+                    </div>
+                </div>
+
+                <!-- ROI Area Display -->
+                <div class="section" id="roiAreaSection" style="display: none;">
+                    <h3>📏 ROI Area</h3>
+                    <div class="area-display" id="areaDisplay">
+                        <span class="area-value" id="areaValue">0</span>
+                        <span class="area-unit">km²</span>
+                    </div>
+                </div>
+
+                <!-- Layer Controls -->
+                <div class="section">
+                    <h3>📊 Analysis Layers</h3>
+                    <div class="layer-controls">
+                        <div class="layer-item active" data-layer="forest">
+                            <div class="layer-info">
+                                <div class="layer-name">🌲 Forest Classification</div>
+                                <div class="layer-description">Biomass and carbon stock analysis</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="forestToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="layer-item" data-layer="wetland">
+                            <div class="layer-info">
+                                <div class="layer-name">🌿 Wetland Classification</div>
+                                <div class="layer-description">Wetland mapping using spectral indices</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="wetlandToggle" disabled>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="layer-item" data-layer="tundra">
+                            <div class="layer-info">
+                                <div class="layer-name">🏔 Tundra Classification</div>
+                                <div class="layer-description">Temperature and permafrost analysis</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="tundraToggle" disabled>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="layer-item" data-layer="grassland">
+                            <div class="layer-info">
+                                <div class="layer-name">🌱 Grassland Classification</div>
+                                <div class="layer-description">Grassland and savanna mapping</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="grasslandToggle" disabled>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="layer-item" data-layer="algal_blooms">
+                            <div class="layer-info">
+                                <div class="layer-name">🦠 Algal Blooms</div>
+                                <div class="layer-description">Harmful algal bloom detection</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="algalBloomsToggle" disabled>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="layer-item" data-layer="soil">
+                            <div class="layer-info">
+                                <div class="layer-name">🏜️ Soil Classification</div>
+                                <div class="layer-description">Soil moisture analysis</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="soilToggle" disabled>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="layer-item" data-layer="chlorophyll">
+                            <div class="layer-info">
+                                <div class="layer-name">🌊 Chlorophyll Concentration</div>
+                                <div class="layer-description">Ocean productivity analysis</div>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="chlorophyllToggle" disabled>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Region of Interest -->
+                <div class="section">
+                    <h3>🗺 Region of Interest (ROI)</h3>
+                    <div class="coordinates-display" id="coordinatesDisplay">
+                        Draw a polygon on the map to define your study area...
+                    </div>
+                </div>
+
+                <!-- Status Display -->
+                <div id="statusContainer"></div>
+
+                <!-- Statistics Panels -->
+                <div class="statistics-panel" id="forestStats">
+                    <h4>🌲 Forest Analysis Results</h4>
+                    <div id="forestStatsContent"></div>
+                </div>
+
+                <div class="statistics-panel" id="wetlandStats">
+                    <h4>🌿 Wetland Analysis Results</h4>
+                    <div id="wetlandStatsContent"></div>
+                </div>
+
+                <div class="statistics-panel" id="tundraStats">
+                    <h4>🏔 Tundra Analysis Results</h4>
+                    <div id="tundraStatsContent"></div>
+                </div>
+
+                <div class="statistics-panel" id="grasslandStats">
+                    <h4>🌱 Grassland Analysis Results</h4>
+                    <div id="grasslandStatsContent"></div>
+                </div>
+
+                <div class="statistics-panel" id="algalBloomsStats">
+                    <h4>🦠 Algal Blooms Analysis Results</h4>
+                    <div id="algalBloomsStatsContent"></div>
+                </div>
+
+                <div class="statistics-panel" id="soilStats">
+                    <h4>🏜️ Soil Moisture Analysis Results</h4>
+                    <div id="soilStatsContent"></div>
+                </div>
+
+                <div class="statistics-panel" id="chlorophyllStats">
+                    <h4>🌊 Chlorophyll Analysis Results</h4>
+                    <div id="chlorophyllStatsContent"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+            
+            <!-- Loading Animation Overlay -->
+            <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                    <div class="loading-text" id="loadingText">Analyzing...</div>
+                </div>
+            </div>
+            
+            <!-- Settings Panel -->
+            <div class="map-settings">
+                <button class="settings-btn" id="settingsBtn">⚙️</button>
+                <div class="settings-panel" id="settingsPanel">
+                    <h4>Map Settings</h4>
+                    
+                    <div class="settings-group">
+                        <label for="resolutionSelect">Spatial Resolution:</label>
+                        <select id="resolutionSelect">
+                            <option value="10" selected>10m (High Detail)</option>
+                            <option value="30">30m (Moderate Detail)</option>
+                            <option value="50">50m (Fast Processing)</option>
+                            <option value="250">250m (Regional Scale)</option>
+                            <option value="500">500m (Large Areas)</option>
+                            <option value="1000">1000m (Continental Scale)</option>
+                        </select>
+                        <div class="resolution-info">
+                            <small>Higher values = Faster analysis for large areas</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Legend -->
+            <div class="map-legend" id="mapLegend" style="display: none;">
+                <!-- Dynamic legend content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div class="modal-overlay" id="alertModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="alertTitle">Alert</h3>
+                <button class="modal-close" id="alertClose">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="alertMessage">Alert message here</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-primary" id="alertOk">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    
+    <!-- Application Scripts -->
+    <script src="/static/apis_statistics.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

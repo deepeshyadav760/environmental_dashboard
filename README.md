@@ -3,7 +3,7 @@
 An open-source geospatial intelligence platform for analyzing ecosystems using satellite data and Google Earth Engine. 
 This web application enables users to interactively explore, classify, and analyze various biomes such as forests, wetlands, tundra, grasslands, oceans, and more — all through a lightweight, responsive interface.
 
-### This is the application deployed link 
+#### This is the application deployed link 
 https://environmental-dashboard-deg3.onrender.com/
 
 <p align="center">
